@@ -20,7 +20,7 @@ class Note {
       'id': id,
       'title': title,
       'content': content,
-      'color': color.value,
+      'color': color.toARGB32(),
       'createdAt': createdAt.toIso8601String(),
     };
   }

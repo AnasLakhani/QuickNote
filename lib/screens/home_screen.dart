@@ -21,6 +21,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Color _selectedColor = AppColors.noteRed;
   String? _editingNoteId;
   DateTime? _editingNoteCreatedAt;
+  String? _titleError;
+  String? _contentError;
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
 
   final List<Map<String, dynamic>> _colorOptions = [
     {'name': AppStrings.colorRed, 'color': AppColors.noteRed},
@@ -33,13 +36,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final title = _titleController.text.trim();
     final content = _contentController.text.trim();
 
-    if (title.isEmpty) {
-      _showSnackBar(AppStrings.errorEmptyTitle, isError: true);
-      return;
-    }
+    setState(() {
+      _titleError = title.isEmpty ? AppStrings.errorEmptyTitle : null;
+      _contentError = content.isEmpty ? AppStrings.errorEmptyContent : null;
+    });
 
-    if (content.isEmpty) {
-      _showSnackBar(AppStrings.errorEmptyContent, isError: true);
+    if (title.isEmpty || content.isEmpty) {
       return;
     }
 
@@ -56,6 +58,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(notesProvider.notifier).updateNote(note);
     } else {
       ref.read(notesProvider.notifier).addNote(note);
+      _listKey.currentState?.insertItem(0);
     }
 
     _titleController.clear();
@@ -64,6 +67,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _selectedColor = AppColors.noteRed;
       _editingNoteId = null;
       _editingNoteCreatedAt = null;
+      _titleError = null;
+      _contentError = null;
     });
     FocusScope.of(context).unfocus();
     _showSnackBar(isEditing ? AppStrings.successNoteUpdated : AppStrings.successNoteSaved, isError: false);
@@ -76,12 +81,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _selectedColor = note.color;
       _editingNoteId = note.id;
       _editingNoteCreatedAt = note.createdAt;
+      _titleError = null;
+      _contentError = null;
     });
   }
 
-  void _deleteNote(String id) {
-    ref.read(notesProvider.notifier).deleteNote(id);
-    if (_editingNoteId == id) {
+  void _deleteNote(Note note, int index) {
+    ref.read(notesProvider.notifier).deleteNote(note.id);
+    _listKey.currentState?.removeItem(
+      index,
+      (context, animation) => _buildItem(note, animation, index),
+      duration: const Duration(milliseconds: 300),
+    );
+
+    if (_editingNoteId == note.id) {
       _titleController.clear();
       _contentController.clear();
       setState(() {
@@ -91,6 +104,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       });
     }
     _showSnackBar(AppStrings.successNoteDeleted, isError: false);
+  }
+
+  Widget _buildItem(Note note, Animation<double> animation, int index) {
+    return SizeTransition(
+      sizeFactor: animation,
+      child: FadeTransition(
+        opacity: animation,
+        child: NoteListItem(
+          note: note,
+          onEdit: () => _editNote(note),
+          onDelete: () => _deleteNote(note, index),
+        ),
+      ),
+    );
   }
 
   void _showSnackBar(String message, {required bool isError}) {
@@ -115,10 +142,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final notes = ref.watch(notesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.background(context),
       appBar: AppBar(
-        title: const Text(AppStrings.appTitle, style: TextStyle(color: AppColors.textPrimary)),
-        backgroundColor: AppColors.cardBackground,
+        title: Text(AppStrings.appTitle, style: TextStyle(color: AppColors.textPrimary(context))),
+        backgroundColor: AppColors.cardBackground(context),
         elevation: 1,
         centerTitle: true,
       ),
@@ -131,7 +158,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.cardBackground,
+                  color: AppColors.cardBackground(context),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -147,12 +174,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     CustomTextField(
                       controller: _titleController,
                       hintText: AppStrings.titleHint,
+                      errorText: _titleError,
                     ),
                     const SizedBox(height: 12),
                     CustomTextField(
                       controller: _contentController,
                       hintText: AppStrings.contentHint,
                       maxLines: 3,
+                      errorText: _contentError,
                     ),
                     const SizedBox(height: 12),
                     // Color Selector
@@ -176,7 +205,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 color: color,
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: isSelected ? AppColors.textPrimary : Colors.transparent,
+                                  color: isSelected ? AppColors.textPrimary(context) : Colors.transparent,
                                   width: 2,
                                 ),
                               ),
@@ -197,10 +226,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       child: Text(
                         _editingNoteId == null ? AppStrings.saveButton : AppStrings.updateButton,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.cardBackground,
+                          color: AppColors.cardBackground(context),
                         ),
                       ),
                     ),
@@ -211,20 +240,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // Notes List
               Expanded(
                 child: notes.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Text(
                           AppStrings.emptyNotesMessage,
-                          style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                          style: TextStyle(color: AppColors.textSecondary(context), fontSize: 16),
                         ),
                       )
-                    : ListView.builder(
-                        itemCount: notes.length,
-                        itemBuilder: (context, index) {
-                          return NoteListItem(
-                            note: notes[index],
-                            onEdit: () => _editNote(notes[index]),
-                            onDelete: () => _deleteNote(notes[index].id),
-                          );
+                    : AnimatedList(
+                        key: _listKey,
+                        initialItemCount: notes.length,
+                        itemBuilder: (context, index, animation) {
+                          if (index >= notes.length) return const SizedBox.shrink();
+                          return _buildItem(notes[index], animation, index);
                         },
                       ),
               ),

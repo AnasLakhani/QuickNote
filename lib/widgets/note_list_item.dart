@@ -42,7 +42,7 @@ class NoteListItem extends StatelessWidget {
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textPrimaryLight,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -53,7 +53,7 @@ class NoteListItem extends StatelessWidget {
                 '${note.createdAt.hour.toString().padLeft(2, '0')}:${note.createdAt.minute.toString().padLeft(2, '0')}',
                 style: const TextStyle(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textSecondaryLight,
                 ),
               ),
             ],
@@ -62,7 +62,7 @@ class NoteListItem extends StatelessWidget {
           Text(
             note.content,
             style: const TextStyle(
-              color: AppColors.textPrimary,
+              color: AppColors.textPrimaryLight,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,

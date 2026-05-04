@@ -5,12 +5,14 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
   final int maxLines;
+  final String? errorText;
 
   const CustomTextField({
     super.key,
     required this.controller,
     required this.hintText,
     this.maxLines = 1,
+    this.errorText,
   });
 
   @override
@@ -18,10 +20,13 @@ class CustomTextField extends StatelessWidget {
     return TextField(
       controller: controller,
       maxLines: maxLines,
+      style: TextStyle(color: AppColors.textPrimary(context)),
       decoration: InputDecoration(
         hintText: hintText,
+        hintStyle: TextStyle(color: AppColors.textSecondary(context)),
+        errorText: errorText,
         filled: true,
-        fillColor: AppColors.cardBackground,
+        fillColor: AppColors.cardBackground(context),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -32,7 +37,7 @@ class CustomTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primary),
+          borderSide: const BorderSide(color: AppColors.primary),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
