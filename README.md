@@ -21,10 +21,6 @@ QuickNote is a beautifully designed, lightweight mobile application for jotting 
 | **Screenshot 5** | **Screenshot 6** | **Screenshot 7** | **Screenshot 8** |
 | <img src="screenshots/5.png" width="200"> | <img src="screenshots/6.png" width="200"> | <img src="screenshots/7.png" width="200"> | <img src="screenshots/8.png" width="200"> |
 
-## 📦 Releases
-
-You can find the latest compiled Android APK in the `/releases` folder:
-- **`quick_note.apk`**
 
 ## 🛠 Tech Stack & Architecture
 
