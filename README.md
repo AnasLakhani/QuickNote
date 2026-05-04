@@ -15,11 +15,11 @@ QuickNote is a beautifully designed, lightweight mobile application for jotting 
 
 ## 📸 Screenshots
 
-*(Place your screenshots in the `/screenshots` folder!)*
-
-| Light Mode | Dark Mode |
-| ---------- | --------- |
-| <img src="screenshots/light_mode.png" width="250"> | <img src="screenshots/dark_mode.png" width="250"> |
+| Screenshot 1 | Screenshot 2 | Screenshot 3 | Screenshot 4 |
+| --- | --- | --- | --- |
+| <img src="screenshots/1.png" width="200"> | <img src="screenshots/2.png" width="200"> | <img src="screenshots/3.png" width="200"> | <img src="screenshots/4.png" width="200"> |
+| **Screenshot 5** | **Screenshot 6** | **Screenshot 7** | **Screenshot 8** |
+| <img src="screenshots/5.png" width="200"> | <img src="screenshots/6.png" width="200"> | <img src="screenshots/7.png" width="200"> | <img src="screenshots/8.png" width="200"> |
 
 ## 📦 Releases
 
